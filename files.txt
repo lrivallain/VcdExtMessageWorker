@@ -1,0 +1,1 @@
+/home/lrivallain/.venvs/staas-api37/lib/python3.7/site-packages/VcdExtMessageWorker-1.0-py3.7.egg
