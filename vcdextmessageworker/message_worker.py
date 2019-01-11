@@ -30,8 +30,9 @@ class MessageWorker(ConsumerMixin):
         self.connection = connection
         self.exchange = Exchange(exchange, 'direct',
                                 durable=True, no_declare=no_declare)
-        self.queue = Queue(queue, exchange=exchange,
+        self.queue = Queue(queue, exchange=self.exchange,
                             routing_key=routing_key, no_declare=no_declare)
+        self.queues = [self.queue]
         self.no_declare = no_declare
         logger.info(f"New listener initialized for exchange/queue: {exchange}/{queue}...")
         logger.debug(f"Importing sub_worker module: {sub_worker}...")
@@ -49,7 +50,7 @@ class MessageWorker(ConsumerMixin):
         """
         logger.debug("Get worker consumers")
         return [Consumer(
-            self.queue,
+            queues=self.queues,
             callbacks=[self.process_task]
         )]
 
