@@ -39,7 +39,6 @@ class MessageWorker(ConsumerMixin):
         self.thread_support = thread_support
         mod_name = self.sub_worker.split(".")[0]
         try:
-            print(mod_name)
             self.sub_worker_mod = importlib.import_module(mod_name)
         except Exception as e:
             logger.error(f"Cannot import the sub worker module named {mod_name}: " + str(e))
