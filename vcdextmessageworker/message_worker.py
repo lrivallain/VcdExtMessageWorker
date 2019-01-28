@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""RabbitMQ message worker for vCloud Director Extensibility SDK.
+"""
 
 import base64
 import sys
@@ -15,14 +17,16 @@ logger = logging.getLogger("VcdExtMessageWorker")
 
 
 class MessageWorker(ConsumerMixin):
-    """ A kombu.ConsumerMixin based object that handle the messages
-        received in the RabbitMQ queue and process them. When proceed,
-        an reply is sent back.
+    """kombu.ConsumerMixin based object.
+
+    A kombu.ConsumerMixin based object that handle the messages
+    received in the RabbitMQ queue and process them. When proceed,
+    an reply is sent back.
     """
 
     def __init__(self, connection, exchange, queue, routing_key, 
                 sub_worker, thread_support=True, no_declare=True):
-        """ Init a new ConsumerMixin object
+        """Init a new ConsumerMixin object.
         """
         # Reduce logging from amqp module
         setup_logging(loglevel='INFO', loggers=['amqp'])
@@ -46,7 +50,7 @@ class MessageWorker(ConsumerMixin):
             sys.exit(-1)
         
     def get_consumers(self, Consumer, channel):
-        """ Return the consumer objects
+        """Return the consumer objects.
         """
         logger.debug("Get worker consumers")
         return [Consumer(
@@ -55,7 +59,7 @@ class MessageWorker(ConsumerMixin):
         )]
 
     def process_task(self, body, message):
-        """ Process a single message on receive
+        """Process a single message on receive.
         """
         logger.info("Listener: New message received in MQ")
         try:
@@ -85,7 +89,7 @@ class MessageWorker(ConsumerMixin):
             logger.error('Listener: Task raised exception: %r', exc)
 
     def publish(self, data, properties):
-        """ Publish a message through the current connection
+        """Publish a message through the current connection.
         """
         logger.debug("Publisher: Sending a message to MQ...")
         rqueue = Queue(
@@ -96,6 +100,10 @@ class MessageWorker(ConsumerMixin):
             routing_key=properties['reply_to'],
             no_declare=self.no_declare
         )
+        if properties.get("encode", True):
+            rsp_body = (base64.b64encode(data.encode('utf-8'))).decode()
+        else:
+            rsp_body = (base64.b64encode(data)).decode() # raw data
         rsp_msg = {
             'id': properties.get('id', None),
             'headers': {
@@ -103,7 +111,7 @@ class MessageWorker(ConsumerMixin):
                 'Content-Length': len(data)
             },
             'statusCode': properties.get("statusCode", 200),
-            'body': (base64.b64encode(data.encode('utf-8'))).decode()
+            'body': rsp_body
         }
         try: 
             self.connection.Producer().publish(
