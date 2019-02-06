@@ -24,7 +24,7 @@ class MessageWorker(ConsumerMixin):
     an reply is sent back.
     """
 
-    def __init__(self, connection, exchange, queue, routing_key, 
+    def __init__(self, connection, exchange, queue, routing_key,
                 sub_worker, thread_support=True, no_declare=True):
         """Init a new ConsumerMixin object.
         """
@@ -42,13 +42,16 @@ class MessageWorker(ConsumerMixin):
         logger.debug(f"Importing sub_worker module: {sub_worker}...")
         self.sub_worker = sub_worker
         self.thread_support = thread_support
-        mod_name = self.sub_worker.split(".")[0]
+        mod_name = '.'.join(self.sub_worker.split(".")[:-1])
         try:
             self.sub_worker_mod = importlib.import_module(mod_name)
+        except ModuleNotFoundError as e:
+            logger.error(f"Cannot import the sub worker module named {mod_name}: ModuleNotFoundError")
+            sys.exit(-1)
         except Exception as e:
             logger.error(f"Cannot import the sub worker module named {mod_name}: " + str(e))
             sys.exit(-1)
-        
+
     def get_consumers(self, Consumer, channel):
         """Return the consumer objects.
         """
@@ -77,7 +80,7 @@ class MessageWorker(ConsumerMixin):
             if self.thread_support:
                 thread = getattr(
                     self.sub_worker_mod,
-                    self.sub_worker.split(".")[1])(
+                    self.sub_worker.split(".")[-1])(
                         message_worker = self,
                         data = json_payload,
                         message = message
@@ -113,7 +116,7 @@ class MessageWorker(ConsumerMixin):
             'statusCode': properties.get("statusCode", 200),
             'body': rsp_body
         }
-        try: 
+        try:
             self.connection.Producer().publish(
                 rsp_msg,
                 correlation_id=properties['correlation_id'],
