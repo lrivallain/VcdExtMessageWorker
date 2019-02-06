@@ -1,4 +1,4 @@
-from distutils.core import setup
+from distutils.core import setup # pylint: disable=no-name-in-module,import-error
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='VcdExtMessageWorker',
-    version='0.1',
+    version='0.2',
     author="Ludovic Rivallain",
     author_email='ludovic.rivallain@gmail.com',
     packages=setuptools.find_packages(),

@@ -27,6 +27,15 @@ class MessageWorker(ConsumerMixin):
     def __init__(self, connection, exchange, queue, routing_key,
                 sub_worker, thread_support=True, no_declare=True):
         """Init a new ConsumerMixin object.
+
+        Args:
+            connection (kombu.Connection): The Kombu Connection object context.
+            exchange (str): The Exchange to use on RabbitMQ.
+            queue (str): The listen queue to use on RabbitMQ.
+            routing_key (str): The routing key to use on RabbitMQ.
+            sub_worker (str): Name of subworker as a string: ex: `package.module.className`.
+            thread_support (bool, optional): Defaults to True. Does the worker support Thread behavior?
+            no_declare (bool, optional): Defaults to True. Declare Exchange and Queue when connecting?
         """
         # Reduce logging from amqp module
         setup_logging(loglevel='INFO', loggers=['amqp'])
@@ -54,6 +63,13 @@ class MessageWorker(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         """Return the consumer objects.
+
+        Args:
+            Consumer (kombu..messaging.Consumer): Current consumer object.
+            channel (str): Incoming channel for messages (unused).
+
+        Returns:
+            kombu..messaging.Consumer: A Consumer message with callback to local task.
         """
         logger.debug("Get worker consumers")
         return [Consumer(
@@ -63,6 +79,10 @@ class MessageWorker(ConsumerMixin):
 
     def process_task(self, body, message):
         """Process a single message on receive.
+
+        Args:
+            body (str): JSON message body as a string.
+            message (str): JSON message metadata as a string.
         """
         logger.info("Listener: New message received in MQ")
         try:
@@ -93,6 +113,10 @@ class MessageWorker(ConsumerMixin):
 
     def publish(self, data, properties):
         """Publish a message through the current connection.
+
+        Args:
+            data (str): JSON message body as a string.
+            properties (str): JSON message metadata as a string.
         """
         logger.debug("Publisher: Sending a message to MQ...")
         rqueue = Queue(
