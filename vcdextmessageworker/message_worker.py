@@ -134,7 +134,9 @@ class MessageWorker(ConsumerMixin):
         rsp_msg = {
             'id': properties.get('id', None),
             'headers': {
-                'Content-Type': properties.get("accept", "application/json;version=31.0"),
+                'Content-Type': properties.get(
+                    "Content-Type", "application/*+json;version=31.0" # default
+                ),
                 'Content-Length': len(data)
             },
             'statusCode': properties.get("statusCode", 200),
